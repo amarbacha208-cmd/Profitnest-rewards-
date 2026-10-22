@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080e1d">
+<title>ProfitNest | Login & Register</title>
+<style>
+:root{--bg:#080e1d;--panel:#111c32;--line:#2b3b59;--blue:#6485ff;--cyan:#42d9e8;--white:#f4f7ff;--muted:#9aabc8;--green:#35d39a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--white);font-family:Arial,sans-serif}
+button,input{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+header{position:sticky;top:0;z-index:10;background:#0b1428;border-bottom:1px solid var(--line);padding:15px}
+.topbar{max-width:960px;margin:auto;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:25px;font-weight:900}.logo span{color:var(--cyan)}
+main{max-width:960px;margin:auto;padding:16px 13px 100px}
+.auth-wrap{max-width:440px;margin:35px auto}
+.card,.stat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;min-width:0}
+.auth-card{background:linear-gradient(150deg,#152747,#10182b);border-color:#33466b}
+h1{font-size:28px;margin:8px 0}
+.heading{font-size:22px;font-weight:900;margin:0 0 13px}
+.muted{color:var(--muted)}.small{font-size:12px;line-height:1.65}
+.field{margin-top:13px}
+.field label{display:block;font-size:13px;font-weight:bold;margin-bottom:7px}
+.field input{width:100%;padding:13px;border-radius:10px;border:1px solid var(--line);background:#091326;color:white;outline:none}
+.field input:focus{border-color:var(--cyan)}
+.btn{border:0;border-radius:11px;padding:12px 15px;background:linear-gradient(100deg,var(--blue),#4775f5);color:white;font-weight:800}
+.btn.full{width:100%;margin-top:12px}
+.btn.secondary{background:#1b2b47;border:1px solid var(--line)}
+.auth-tabs{display:flex;gap:8px;margin:18px 0}
+.auth-tabs button{flex:1}
+.message{font-size:13px;line-height:1.6;margin-top:10px;overflow-wrap:anywhere}
+.hero{padding:23px 19px;border:1px solid #38568a;border-radius:20px;background:linear-gradient(130deg,#1a3671,#182749 60%,#123b4b)}
+.hero h1{font-size:30px;margin:10px 0}.hero p{font-size:13px;line-height:1.7;color:#d3def5}
+.section{margin-top:24px;scroll-margin-top:82px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat-label{font-size:12px;color:var(--muted)}
+.stat-value{font-size:22px;font-weight:900;margin-top:8px;overflow-wrap:anywhere}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.plan{background:linear-gradient(160deg,#172746,#101a2f);border-color:#33466b}
+.tag{display:inline-block;background:#263e69;color:#dce8ff;border-radius:20px;padding:5px 9px;font-size:10px;font-weight:bold;margin-bottom:9px}
+.plan-name{display:block;font-size:25px;line-height:1.2;font-weight:900;margin:7px 0 13px}
+.plan-price{font-size:25px;font-weight:900;color:var(--cyan);margin:5px 0}
+.profit{display:flex;justify-content:space-between;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:12px}
+.profit strong{color:var(--green);text-align:right}
+.notice{background:#172641;border:1px solid #314969;border-radius:12px;padding:12px;font-size:12px;line-height:1.65;color:#d6e3fa;margin-top:12px}
+.number{font-size:23px;font-weight:900;color:var(--cyan);overflow-wrap:anywhere;margin:8px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.reward{font-weight:900;color:var(--green)}
+.task-title{font-size:17px;font-weight:900;margin:4px 0 8px}
+.bottom{position:fixed;z-index:20;bottom:0;left:0;right:0;background:#0b1428;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 3px calc(9px + env(safe-area-inset-bottom))}
+.bottom button{background:none;border:0;color:#c2cde2;font-size:11px;padding:4px}
+.bottom button span{display:block;font-size:19px;margin-bottom:3px}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+@media(min-width:650px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.hero h1{font-size:36px}}
+@media(max-width:350px){.cards{grid-template-columns:1fr}.plan-name{font-size:23px}}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="topbar">
+  <div class="logo">Profit<span>Nest</span></div>
+  <button id="logoutBtn" class="btn secondary hidden" onclick="logout()">Logout</button>
+ </div>
+</header>
+
+<!-- LOGIN / REGISTER -->
+<main id="authScreen">
+ <div class="auth-wrap">
+  <div class="card auth-card">
+   <div class="logo">Profit<span>Nest</span></div>
+   <h1 id="authTitle">Welcome Back!</h1>
+   <p class="muted small" id="authSubtitle">Login to your account to continue.</p>
+
+   <div class="auth-tabs">
+    <button class="btn" id="loginTab" onclick="showAuth('login')">Login</button>
+    <button class="btn secondary" id="registerTab" onclick="showAuth('register')">Register</button>
+   </div>
+
+   <form id="authForm">
+    <div class="field hidden" id="nameField">
+     <label for="fullName">Full Name</label>
+     <input id="fullName" autocomplete="name" placeholder="Enter your full name">
+    </div>
+    <div class="field">
+     <label for="email">Email Address</label>
+     <input id="email" type="email" autocomplete="email" placeholder="Enter your email" required>
+    </div>
+    <div class="field">
+     <label for="password">Password</label>
+     <input id="password" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters" required>
+    </div>
+    <button class="btn full" id="authSubmit" type="submit">Login</button>
+    <p class="message" id="authMsg" aria-live="polite"></p>
+   </form>
+   <p class="muted small">Use an email you control. Never share your password or payment PIN.</p>
+  </div>
+ </div>
+</main>
+
+<!-- APP -->
+<main id="appScreen" class="hidden">
+ <section class="hero">
+  <small>WELCOME TO PROFITNEST</small>
+  <h1>Rewards. Tasks. Progress.</h1>
+  <p>Welcome, <strong id="welcomeName">Member</strong>! Explore plans, tasks and your account.</p>
+  <button class="btn" onclick="go('plans')">Explore Plans →</button>
+ </section>
+
+ <section class="section" id="dashboard">
+  <h2 class="heading">My Dashboard</h2>
+  <div class="stats">
+   <div class="stat"><div class="stat-label">Available Balance</div><div class="stat-value" id="balance">Rs 0</div></div>
+   <div class="stat"><div class="stat-label">My Plan</div><div class="stat-value" id="myPlan" style="font-size:17px">Not selected</div></div>
+   <div class="stat"><div class="stat-label">My Earnings</div><div class="stat-value" id="myEarnings">Rs 0</div></div>
+   <div class="stat"><div class="stat-label">Today's Earnings</div><div class="stat-value" id="todayEarnings">Rs 0</div></div>
+   <div class="stat"><div class="stat-label">Monthly Earnings</div><div class="stat-value" id="monthlyEarnings">Rs 0</div></div>
+   <div class="stat"><div class="stat-label">Referral Earnings</div><div class="stat-value" id="refEarnings">Rs 0</div></div>
+  </div>
+ </section>
+
+ <section class="section" id="plans">
+  <h2 class="heading">💎 Select Your Plan</h2>
+  <div class="cards" id="planCards"></div>
+ </section>
+
+ <section class="section hidden" id="deposit">
+  <h2 class="heading">💳 Deposit Payment</h2>
+  <div class="card">
+   <div class="muted small">Selected Plan</div>
+   <div id="selectedPlan" class="plan-name"></div>
+   <div class="muted small">Deposit Amount</div>
+   <div class="plan-price" id="selectedAmount"></div>
+   <div class="profit"><span>Daily Earnings</span><strong id="selectedDaily"></strong></div>
+   <div class="profit"><span>Monthly Earnings</span><strong id="selectedMonthly"></strong></div>
+   <hr>
+   <div class="muted small">EasyPaisa Recipient Name</div>
+   <div style="font-size:19px;font-weight:900;margin-top:5px">Hira</div>
+   <div class="muted small" style="margin-top:13px">EasyPaisa Number</div>
+   <div class="number">03715828536</div>
+   <button class="btn secondary full" onclick="copyNumber()">Copy EasyPaisa Number</button>
+   <div class="field"><label for="payerName">Your Name</label><input id="payerName" placeholder="Enter your name"></div>
+   <div class="field"><label for="payerPhone">Your Mobile Number</label><input id="payerPhone" inputmode="tel" placeholder="03XXXXXXXXX"></div>
+   <div class="field"><label for="transactionId">Transaction ID / TID</label><input id="transactionId" placeholder="Enter transaction reference"></div>
+   <button class="btn full" onclick="submitPayment()">Submit Payment Details</button>
+   <p id="paymentMsg" class="message" aria-live="polite"></p>
+  </div>
+ </section>
+
+ <section class="section" id="tasks">
+  <h2 class="heading">📋 Available Tasks</h2>
+  <div class="card">
+   <div class="row"><div class="task-title">WhatsApp Channel</div><strong class="reward">Rs 100</strong></div>
+   <p class="muted small">Open the channel and then return to submit the task.</p>
+   <a class="btn full" href="https://whatsapp.com/channel/0029VbEBZyP3LdQLeRcx9x00" target="_blank" rel="noopener noreferrer">Open WhatsApp Channel ↗</a>
+   <button class="btn secondary full" id="taskButton" onclick="taskNotice()">Submit Task</button>
+   <p class="message" id="taskMsg" aria-live="polite"></p>
+  </div>
+ </section>
+
+ <section class="section" id="refer">
+  <h2 class="heading">👥 Refer & Share</h2>
+  <div class="card">
+   <div class="task-title">Your Website Link</div>
+   <div class="field"><input id="refLink" readonly></div>
+   <button class="btn full" onclick="copyLink()">Copy Referral Link</button>
+   <button class="btn secondary full" onclick="shareLink()">Share Website</button>
+   <hr>
+   <div class="row"><span class="muted small">Referral reward</span><strong class="reward">Rs 300</strong></div>
+   <p id="refMsg" class="message"></p>
+  </div>
+ </section>
+
+ <section class="section" id="withdraw">
+  <h2 class="heading">🏦 Withdraw</h2>
+  <div class="card">
+   <div class="row"><span class="muted">Minimum withdrawal</span><strong>Rs 1,000</strong></div>
+   <div class="row" style="margin-top:12px"><span class="muted">Available balance</span><strong id="withdrawBalance">Rs 0</strong></div>
+   <div class="field"><label for="withdrawAccount">Your EasyPaisa Account Number</label><input id="withdrawAccount" inputmode="tel" placeholder="03XXXXXXXXX"></div>
+   <div class="field"><label for="withdrawName">Account Holder Name</label><input id="withdrawName" placeholder="Enter account holder name"></div>
+   <button class="btn full" onclick="requestWithdraw()">Submit Withdrawal Request</button>
+   <p id="withdrawMsg" class="message" aria-live="polite"></p>
+  </div>
+ </section>
+</main>
+
+<nav class="bottom hidden" id="bottomNav">
+ <button onclick="go('dashboard')"><span>⌂</span>Home</button>
+ <button onclick="go('plans')"><span>💎</span>Plans</button>
+ <button onclick="go('tasks')"><span>✓</span>Tasks</button>
+ <button onclick="go('refer')"><span>👥</span>Refer</button>
+ <button onclick="go('withdraw')"><span>⇧</span>Withdraw</button>
+</nav>
+
+<script>
+const plans=[
+ {name:"Starter Plan",amount:300,daily:100},
+ {name:"Basic Plan",amount:400,daily:150},
+ {name:"Silver Plan",amount:500,daily:200},
+ {name:"Gold Plan",amount:700,daily:250},
+ {name:"Platinum Plan",amount:1000,daily:300},
+ {name:"Diamond Plan",amount:1500,daily:400},
+ {name:"Premium Plan",amount:3000,daily:5000}
+];
+
+let authMode="login";
+let currentUser=null;
+let chosenPlan=null;
+let myEarnings=0;
+let whatsappRewardClaimed=false;
+
+const money=n=>"Rs "+Number(n).toLocaleString("en-PK");
+
+function showAuth(mode){
+ authMode=mode;
+ const isRegister=mode==="register";
+ document.getElementById("authTitle").textContent=isRegister?"Create Account":"Welcome Back!";
+ document.getElementById("authSubtitle").textContent=isRegister?"Register to access ProfitNest.":"Login to your account to continue.";
+ document.getElementById("nameField").classList.toggle("hidden",!isRegister);
+ document.getElementById("fullName").required=isRegister;
+ document.getElementById("password").autocomplete=isRegister?"new-password":"current-password";
+ document.getElementById("authSubmit").textContent=isRegister?"Create Account":"Login";
+ document.getElementById("loginTab").className=isRegister?"btn secondary":"btn";
+ document.getElementById("registerTab").className=isRegister?"btn":"btn secondary";
+ document.getElementById("authMsg").textContent="";
+}
+
+function getUsers(){
+ try{return JSON.parse(localStorage.getItem("profitnest_users")||"{}")}
+ catch(e){return {}}
+}
+
+document.getElementById("authForm").addEventListener("submit",function(e){
+ e.preventDefault();
+ const email=document.getElementById("email").value.trim().toLowerCase();
+ const password=document.getElementById("password").value;
+ const name=document.getElementById("fullName").value.trim();
+ const msg=document.getElementById("authMsg");
+
+ if(!email||!password){msg.textContent="Enter email and password.";return}
+ if(password.length<8){msg.textContent="Password must be at least 8 characters.";return}
+
+ const users=getUsers();
+
+ if(authMode==="register"){
+  if(!name){msg.textContent="Enter your full name.";return}
+  if(users[email]){msg.textContent="Account already exists. Please login.";return}
+  users[email]={name:name,password:password};
+  try{localStorage.setItem("profitnest_users",JSON.stringify(users))}
+  catch(err){msg.textContent="Browser storage is unavailable. Please enable it.";return}
+  loginUser(email,users[email]);
+ }else{
+  if(!users[email]||users[email].password!==password){
+   msg.textContent="Incorrect email or password, or account not registered.";
+   return;
+  }
+  loginUser(email,users[email]);
+ }
+});
+
+function loginUser(email,user){
+ currentUser=email;
+ document.getElementById("authScreen").classList.add("hidden");
+ document.getElementById("appScreen").classList.remove("hidden");
+ document.getElementById("bottomNav").classList.remove("hidden");
+ document.getElementById("logoutBtn").classList.remove("hidden");
+ document.getElementById("welcomeName").textContent=user.name;
+ loadUserData();
+ renderPlans();
+ document.getElementById("refLink").value=window.location.href.split("#")[0];
+ go("dashboard");
+}
+
+function logout(){
+ currentUser=null;
+ chosenPlan=null;
+ document.getElementById("appScreen").classList.add("hidden");
+ document.getElementById("bottomNav").classList.add("hidden");
+ document.getElementById("logoutBtn").classList.add("hidden");
+ document.getElementById("authScreen").classList.remove("hidden");
+ document.getElementById("password").value="";
+ showAuth("login");
+}
+
+function userDataKey(){return "profitnest_data_"+currentUser}
+function loadUserData(){
+ let data={};
+ try{data=JSON.parse(localStorage.getItem(userDataKey())||"{}")}catch(e){}
+ myEarnings=Number(data.myEarnings)||0;
+ whatsappRewardClaimed=!!data.whatsappRewardClaimed;
+ document.getElementById("myEarnings").textContent=money(myEarnings);
+ document.getElementById("todayEarnings").textContent=money(myEarnings);
+ document.getElementById("monthlyEarnings").textContent=money(myEarnings);
+ document.getElementById("balance").textContent=money(myEarnings);
+ document.getElementById("withdrawBalance").textContent=money(myEarnings);
+ document.getElementById("taskButton").textContent=whatsappRewardClaimed?"Task Submitted ✓":"Submit Task";
+ document.getElementById("taskMsg").textContent=whatsappRewardClaimed?"Rs 100 is displayed in your browser-saved earnings.":"";
+ document.getElementById("myPlan").textContent=data.planName||"Not selected";
+}
+
+function saveUserData(){
+ if(!currentUser)return;
+ const data={myEarnings,whatsappRewardClaimed,planName:chosenPlan?chosenPlan.name:document.getElementById("myPlan").textContent};
+ try{localStorage.setItem(userDataKey(),JSON.stringify(data))}catch(e){}
+}
+
+function renderPlans(){
+ document.getElementById("planCards").innerHTML=plans.map((p,i)=>`
+  <div class="card plan">
+   <span class="tag">PLAN ${String(i+1).padStart(2,"0")}</span>
+   <strong class="plan-name">${p.name}</strong>
+   <div class="muted small">Deposit Amount</div>
+   <div class="plan-price">${money(p.amount)}</div>
+   <div class="profit"><span>Daily Earnings</span><strong>${money(p.daily)}</strong></div>
+   <div class="profit"><span>Monthly Earnings</span><strong>${money(p.daily*30)}</strong></div>
+   <button class="btn full" onclick="selectPlan(${i})">Select Plan</button>
+  </div>`).join("");
+}
+
+function go(id){
+ const target=document.getElementById(id);
+ if(target){target.classList.remove("hidden");target.scrollIntoView({behavior:"smooth",block:"start"})}
+}
+
+function selectPlan(index){
+ chosenPlan=plans[index];
+ document.getElementById("selectedPlan").textContent=chosenPlan.name;
+ document.getElementById("selectedAmount").textContent=money(chosenPlan.amount);
+ document.getElementById("selectedDaily").textContent=money(chosenPlan.daily);
+ document.getElementById("selectedMonthly").textContent=money(chosenPlan.daily*30);
+ document.getElementById("myPlan").textContent=chosenPlan.name;
+ document.getElementById("deposit").classList.remove("hidden");
+ saveUserData();
+ go("deposit");
+}
+
+async function copyText(value){
+ try{await navigator.clipboard.writeText(value);return true}
+ catch(e){
+  const el=document.createElement("textarea");el.value=value;
+  document.body.appendChild(el);el.select();
+  let ok=false;try{ok=document.execCommand("copy")}catch(err){}
+  el.remove();return ok;
+ }
+}
+
+async function copyNumber(){
+ const ok=await copyText("03715828536");
+ alert(ok?"Number copied. Verify recipient details before paying.":"Copy manually: 03715828536");
+}
+
+function submitPayment(){
+ const msg=document.getElementById("paymentMsg");
+ if(!chosenPlan){msg.textContent="Select a plan first.";return}
+ const name=document.getElementById("payerName").value.trim();
+ const phone=document.getElementById("payerPhone").value.trim();
+ const tid=document.getElementById("transactionId").value.trim();
+ if(!name||!phone||!tid){msg.textContent="Enter your name, mobile number and transaction ID.";return}
+ msg.textContent="Payment details entered. Payment verification and plan activation require a secure backend.";
+}
+
+function taskNotice(){
+ const msg=document.getElementById("taskMsg");
+ if(whatsappRewardClaimed){msg.textContent="This task has already been submitted.";return}
+ myEarnings+=100;
+ whatsappRewardClaimed=true;
+ document.getElementById("myEarnings").textContent=money(myEarnings);
+ document.getElementById("todayEarnings").textContent=money(myEarnings);
+ document.getElementById("monthlyEarnings").textContent=money(myEarnings);
+ document.getElementById("balance").textContent=money(myEarnings);
+ document.getElementById("withdrawBalance").textContent=money(myEarnings);
+ document.getElementById("taskButton").textContent="Task Submitted ✓";
+ msg.textContent="Rs 100 added to the displayed My Earnings total.";
+ saveUserData();
+}
+
+document.getElementById("refLink").value=window.location.href.split("#")[0];
+
+async function copyLink(){
+ const link=window.location.href.split("#")[0];
+ document.getElementById("refLink").value=link;
+ const ok=await copyText(link);
+ document.getElementById("refMsg").textContent=ok?"Website link copied.":"Copy the link manually.";
+}
+
+async function shareLink(){
+ const url=window.location.href.split("#")[0];
+ if(navigator.share){try{await navigator.share({title:"ProfitNest",text:"Visit ProfitNest",url})}catch(e){}}
+ else{await copyLink()}
+}
+
+function requestWithdraw(){
+ const account=document.getElementById("withdrawAccount").value.trim();
+ const name=document.getElementById("withdrawName").value.trim();
+ const msg=document.getElementById("withdrawMsg");
+ if(!account||!name){msg.textContent="Enter your account number and account holder name.";return}
+ if(myEarnings<1000){msg.textContent="Displayed earnings are below Rs 1,000.";return}
+ msg.textContent="A real withdrawal needs backend verification and payment processing.";
+}
+
+showAuth("login");
+</script>
+</body>
+</html>
